@@ -3,6 +3,11 @@ from pydantic import BaseModel
 from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.output_parsers import PydanticOutputParser
+from langchain_classic.agents import (
+    AgentExecutor,
+    create_tool_calling_agent,
+    tool,
+)
 
 load_dotenv()
 
@@ -30,3 +35,13 @@ prompt = ChatPromptTemplate.from_messages(
         ("placeholder", "{agent_scratchpad}")
     ]
 ).partial(format_instructions=parser.get_format_instructions())
+
+agent = create_tool_calling_agent(
+    llm=llm,
+    prompt=prompt,
+    tools=[]
+)
+
+agent_executor = AgentExecutor(agent=agent, tools=[], verbose=True)
+raw_reponse = agent_executor.invoke({"query": "What is the capital of France?"})
+print(raw_reponse)
