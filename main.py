@@ -8,6 +8,7 @@ from langchain_classic.agents import (
     create_tool_calling_agent,
     tool,
 )
+from tools import search_tool
 
 load_dotenv()
 
@@ -36,14 +37,16 @@ prompt = ChatPromptTemplate.from_messages(
     ]
 ).partial(format_instructions=parser.get_format_instructions())
 
+tools = [search_tool]
 agent = create_tool_calling_agent(
     llm=llm,
     prompt=prompt,
-    tools=[]
+    tools=tools
 )
 
 agent_executor = AgentExecutor(agent=agent, tools=[], verbose=True)
-raw_reponse = agent_executor.invoke({"query": "What is the capital of France?"})
+query = input("What can I help you research with? ")
+raw_reponse = agent_executor.invoke({"query": query})
 
 try: 
     structured_reponse = parser.parse(raw_reponse.get("output")[0]["text"])
